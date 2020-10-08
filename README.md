@@ -1,1 +1,1 @@
-# Self-Organizing-Tensor-Tree
+# Self-Organizing-Tree

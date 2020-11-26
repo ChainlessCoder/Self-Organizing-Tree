@@ -2,10 +2,10 @@ from math import log2, ceil
 import torch
 
 
-class SOTLayer(torch.nn.Module):
+class SOT(torch.nn.Module):
 
     def __init__(self, number_of_leaves: int, input_dim: int, lr: float = 0.3, device = torch.device("cpu")):
-        super(SOTLayer, self).__init__()
+        super(SOT, self).__init__()
         self.leaf_num = 2**ceil(log2(number_of_leaves))
         self.depth = log2(self.leaf_num)
         self.learning_rates = self.learning_rates_per_branch(lr)

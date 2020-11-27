@@ -18,13 +18,13 @@ class SOT(torch.nn.Module):
         return self.nodes[int((self.nodes.shape[0]-1) / 2) : ]
 
     def pnorm(self, x1, x2, p=2):
-        return torch.pow(torch.pow(x1 - x2.unsqueeze(dim=0).unsqueeze(dim=0), p).sum(dim=2), p)
+        return torch.pow(torch.pow(x1 - x2.unsqueeze(dim=1), p).sum(dim=2), p)
 
     def learning_rates_per_branch(self, lr: float):
         return (lr * 2 ** torch.arange(1,self.depth+2, dtype=torch.float)) / (2**(self.depth+1))
 
     def _propagate_through_tree(self, X):
-        patch_num = 1 #X.shape[2]
+        patch_num = 1
         start, num = 1, 2
         layers = []
         layer_state = torch.zeros(patch_num, 1, dtype=int)
@@ -42,9 +42,10 @@ class SOT(torch.nn.Module):
             layer_state = layer_state.add((layer == bmu_index).to(torch.int64))
             layers.append(layer_state)
             start += nodes_per_layer
-        return torch.cat(layers, dim=1), bmu_index, bmu_dists
+        return torch.cat(layers, dim=1), bmu_index.unsqueeze(0), bmu_dists
 
     def forward(self, X):
+        X = X.unsqueeze(0)
         indices, bmu_index, bmu_dists = self._propagate_through_tree(X)
         neighborhood_lrs = torch.gather(input=self.learning_rates, index= indices.flatten(), dim=0).reshape(indices.shape)
         neighborhood_updates = (neighborhood_lrs.squeeze().unsqueeze(1).to(self.device) * (X.unsqueeze(0).to(self.device) - self.nodes[1:,:].unsqueeze(0).to(self.device))).mean(0)

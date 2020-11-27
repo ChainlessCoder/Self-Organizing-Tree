@@ -23,8 +23,8 @@ class SOT(torch.nn.Module):
     def learning_rates_per_branch(self, lr: float):
         return (lr * 2 ** torch.arange(1,self.depth+2, dtype=torch.float)) / (2**(self.depth+1))
 
-    def _propagate_through_tree(self, X):
-        patch_num = 1
+    def _propagate_through_tree(self, X, patch_number = 1):
+        patch_num = patch_number
         start, num = 1, 2
         layers = []
         layer_state = torch.zeros(patch_num, 1, dtype=int)
@@ -38,11 +38,11 @@ class SOT(torch.nn.Module):
             competing_nodes = self.nodes[competing_indices].clone().to('cpu')
             dist = self.pnorm(competing_nodes, X)
             bmu_dists, bmu = torch.min(dist, 1)
-            bmu_index = competing_indices.squeeze()[bmu.squeeze()]
+            bmu_index = torch.gather(input = competing_indices, dim = 1, index = bmu.unsqueeze(dim=1))#competing_indices.squeeze()[bmu.squeeze()]
             layer_state = layer_state.add((layer == bmu_index).to(torch.int64))
             layers.append(layer_state)
             start += nodes_per_layer
-        return torch.cat(layers, dim=1), bmu_index.unsqueeze(0), bmu_dists
+        return torch.cat(layers, dim=1), bmu_index, bmu_dists
 
     def forward(self, X):
         X = X.unsqueeze(0)

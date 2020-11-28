@@ -38,7 +38,7 @@ class SOT(torch.nn.Module):
             competing_nodes = self.nodes[competing_indices].clone().to('cpu')
             dist = self.pnorm(competing_nodes, X)
             bmu_dists, bmu = torch.min(dist, 1)
-            bmu_index = torch.gather(input = competing_indices, dim = 1, index = bmu.unsqueeze(dim=1))#competing_indices.squeeze()[bmu.squeeze()]
+            bmu_index = torch.gather(input = competing_indices, dim = 1, index = bmu.unsqueeze(dim=1))
             layer_state = layer_state.add((layer == bmu_index).to(torch.int64))
             layers.append(layer_state)
             start += nodes_per_layer

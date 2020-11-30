@@ -14,13 +14,14 @@ class Conv2dSOT(SOT):
     def img2patches(self, x):
         padded = torch.nn.functional.pad(x, [self.padding] * 4, "constant", 0)
         p = padded.unfold(0, self.kernel_size, self.stride).unfold(1, self.kernel_size, self.stride)
+        rows, cols = p.shape[0], p.shape[1]
         out = p.reshape(p.shape[0] * p.shape[1], p.shape[2] * p.shape[3])
-        return out
+        return out, rows, cols
 
     def forward(self, X):
-        X = self.img2patches(X)
+        X, rows, cols = self.img2patches(X)
         indices, bmu_indices, bmu_dists = self._propagate_through_tree(X, patch_number = X.shape[0])
         neighborhood_lrs = torch.gather(input=self.learning_rates, index= indices.flatten(), dim=0).reshape(indices.shape)
         neighborhood_updates = (neighborhood_lrs.unsqueeze(2).to(self.device) * (X.unsqueeze(1).to(self.device) - self.nodes[1:,:].unsqueeze(0).to(self.device))).mean(0)
         self.nodes[1:, :] += neighborhood_updates
-        return bmu_indices
+        return bmu_indices.reshape(rows, cols)

@@ -18,7 +18,7 @@ class SOT(torch.nn.Module):
         return self.nodes[int((self.nodes.shape[0]-1) / 2) : ]
 
     def pnorm(self, x1, x2, p=2):
-        return torch.pow(torch.pow(x1 - x2.unsqueeze(dim=1), p).sum(dim=2), p)
+        return torch.pow(torch.pow(x1 - x2.unsqueeze(dim=1), p).sum(dim=2), 1/p)
 
     def learning_rates_per_branch(self, lr: float):
         return (lr * 2 ** torch.arange(1,self.depth+2, dtype=torch.float)) / (2**(self.depth+1))

@@ -14,14 +14,8 @@ import torch
 transform = transforms.ToTensor()
 
 training_set = datasets.FashionMNIST("~/.pytorch/F_MNIST_data", download = False, train = True, transform = transform)
-testing_set = datasets.FashionMNIST("~/.pytorch/F_MNIST_data", download = False, train = False, transform = transform)
 
 train_dataloader = DataLoader(training_set,  
-                            shuffle = True,  
-                            batch_size = 1,  
-                            num_workers = 0  
-                            )
-test_dataloader = DataLoader(testing_set,  
                             shuffle = True,  
                             batch_size = 1,  
                             num_workers = 0  
